@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using System.Windows;
 
 namespace ServerManagerInterface
 {
@@ -17,9 +16,9 @@ namespace ServerManagerInterface
 
         public bool ControlsEnabled { get; set; } = true;
 
-        public string StartBtnContent { get; set; } = "Start Server";
-        public string BackupBtnContent { get; set; } = "Backup Server";
-        public string RestoreBtnContent { get; set; } = "Restore Backup";
+        public string StartBtnContent { get; set; }
+        public string BackupBtnContent { get; set; }
+        public string RestoreBtnContent { get; set; }
 
     }
 }

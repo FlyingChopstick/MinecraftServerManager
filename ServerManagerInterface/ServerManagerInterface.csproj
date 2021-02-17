@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
@@ -18,8 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\CommonFunctionality\CommonFunctionality.csproj" />
-    <ProjectReference Include="..\ServerBackup\ServerBackup.csproj" />
-    <ProjectReference Include="..\ServerRestore\ServerRestore.csproj" />
+    <ProjectReference Include="..\ServerManager\ServerManager.csproj" />
   </ItemGroup>
 
 </Project>

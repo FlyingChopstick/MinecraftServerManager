@@ -3,10 +3,17 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace CommonFunctionality
 {
+    public enum Operation
+    {
+        Backup = 0,
+        Restore = 1,
+    }
 
     public static class Config
     {
@@ -19,7 +26,9 @@ namespace CommonFunctionality
             LogFile,
             MemoryFile,
             MemoryDescription,
-            DateTimeFormat
+            DateTimeFormat,
+            JarName,
+            LaunchOpts
         }
         private static readonly Dictionary<ConfigValue, string> ConfigNames = new Dictionary<ConfigValue, string>
         {
@@ -31,15 +40,19 @@ namespace CommonFunctionality
             { ConfigValue.MemoryFile, "Memory File" },
             { ConfigValue.MemoryDescription, "Memory Format" },
             { ConfigValue.DateTimeFormat, "DateTime Format" },
+            { ConfigValue.JarName, "Server JAR name" },
+            { ConfigValue.LaunchOpts, "Server start arguments" },
         };
 
 
+        public static string ServerJar { get => ConfigurationManager.AppSettings.Get(ConfigNames[ConfigValue.JarName]); }
+        public static string LaunchOpts { get => ConfigurationManager.AppSettings.Get(ConfigNames[ConfigValue.LaunchOpts]); }
 
 
-        public static string OriginDirectory => ConfigurationManager.AppSettings.Get(ConfigNames[ConfigValue.OriginDirectory]);
+        public static string OriginDirectory { get; set; } = ConfigurationManager.AppSettings.Get(ConfigNames[ConfigValue.OriginDirectory]);
+        public static string BackupDirectory { get; set; } = ConfigurationManager.AppSettings.Get(ConfigNames[ConfigValue.BackupDirectory]);
 
 
-        public static string BackupDirectory { get => ConfigurationManager.AppSettings.Get("Backup Directory"); }
         public static string BackupFormat { get => ConfigurationManager.AppSettings.Get(ConfigNames[ConfigValue.BackupFormat]); }
         public static int BackupMaxCount => Convert.ToInt32(ConfigurationManager.AppSettings.Get(ConfigNames[ConfigValue.BackupMaxCount]));
 
@@ -68,11 +81,19 @@ namespace CommonFunctionality
         /// </summary>
         /// <param name="about">Path to the origin folder</param>
         /// <param name="where">Where to create a Memory file</param>
-        public static void CreateMemory(string about, string where)
+        public static void CreateMemoryFile(string about, string where)
         {
             Directory.CreateDirectory(where);
-            File.WriteAllText($"{where}\\{Config.MemoryFile}", $"{MemoryDescription}{about}");
+            File.WriteAllText($"{where}\\backup{Config.MemoryFile}", $"{MemoryDescription}{about}");
         }
+        public static string ReadMemoryFile(string path)
+        {
+            if (!File.Exists(path))
+                throw new FileNotFoundException("Could not find the Memory file");
+
+            return File.ReadAllLines(path).Where(l => l.StartsWith(Config.MemoryDescription)).FirstOrDefault().Substring(Config.MemoryDescription.Length);
+        }
+
         public static void Robocopy(string source, string destination)
         {
             try
@@ -94,9 +115,17 @@ namespace CommonFunctionality
             }
         }
 
-        public static Task RobocopyAsync(string source, string destination)
+
+
+        public delegate void RobocopyCompleteHandler(Operation operation, string destination);
+        public delegate void RobocopyFailedHandler(Operation operation, Exception ex);
+
+        public static event RobocopyCompleteHandler RobocopyComplete;
+        public static event RobocopyFailedHandler RobocopyFailed;
+
+        public static async Task RobocopyAsync(Operation operation, string source, string destination)
         {
-            return Task.Run(() =>
+            bool res = await Task.Run(() =>
             {
                 try
                 {
@@ -108,14 +137,26 @@ namespace CommonFunctionality
                     robocopy.StartInfo.UseShellExecute = false;
 
                     robocopy.Start();
+                    robocopy.Exited += Robocopy_Exited;
+                    return true;
                     //robocopy.WaitForExit();
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
                     Directory.Delete(destination, true);
-                    throw;
+
+                    RobocopyFailed?.Invoke(operation, ex);
+                    return false;
                 }
-            });
+            }, new CancellationTokenSource(new TimeSpan(0, 0, 30)).Token);
+
+            if (res)
+                RobocopyComplete?.Invoke(operation, destination);
+        }
+
+        public static void Robocopy_Exited(object sender, EventArgs e)
+        {
+            throw new NotImplementedException();
         }
     }
 }

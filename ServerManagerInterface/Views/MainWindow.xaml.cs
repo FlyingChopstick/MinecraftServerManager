@@ -1,6 +1,10 @@
-﻿using ServerManagerInterface.Controllers;
+﻿using CommonFunctionality;
+using Microsoft.Win32;
+using ServerManagerInterface.Controllers;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Windows;
-
 
 namespace ServerManagerInterface
 {
@@ -12,50 +16,33 @@ namespace ServerManagerInterface
         private InterfaceController _controller;
         private InterfaceModel _model;
 
+        private List<DirectoryInfo> _backupList;
+        private int _selectedIndex;
+
         public MainWindow()
         {
-            _model = new InterfaceModel();
-            _controller = new InterfaceController(_model);
+            _model = new();
+            _controller = new(_model);
 
-            _controller.ServerStarted += ServerStartedHandler;
-            _controller.ServerStopped += ServerStoppedHandler;
+            _backupList = new();
+            _selectedIndex = 0;
+            //_controller.ServerStarted += ServerStartedHandler;
+            //_controller.ServerStopped += ServerStoppedHandler;
 
             _controller.ControlsUpdated += ControlsUpdatedHander;
 
             this.DataContext = _model;
 
-
             InitializeComponent();
+
+            UpdateControls();
         }
 
         private void ControlsUpdatedHander()
         {
-            UpdateControls();
+            RefreshControls();
         }
-
-        private void ServerStoppedHandler()
-        {
-            this.Dispatcher.Invoke(() =>
-            {
-                UpdateControls();
-            });
-        }
-        private void ServerStartedHandler()
-        {
-            this.Dispatcher.Invoke(() =>
-            {
-                UpdateControls();
-            });
-        }
-
-        private async void StartServer_Click(object sender, RoutedEventArgs e)
-        {
-            //await ServerBackup.ServerController.StartServerAsync();
-            await _controller.StartServerAsync();
-            //UpdateControls();
-        }
-
-        private void UpdateControls()
+        private void RefreshControls()
         {
             this.Dispatcher.Invoke(() =>
             {
@@ -68,23 +55,84 @@ namespace ServerManagerInterface
                 RestoreServer.Content = _model.RestoreBtnContent;
             });
         }
+        private void UpdateControls()
+        {
+            _controller.UpdateControls();
+            RefreshControls();
+        }
 
+        private async void StartServer_Click(object sender, RoutedEventArgs e)
+        {
+            await _controller.SwitchStateAsync(State.Running);
+        }
         private async void BackupServer_Click(object sender, RoutedEventArgs e)
         {
-            try
+            await _controller.SwitchStateAsync(State.Backup);
+        }
+        private void RestoreServer_Click(object sender, RoutedEventArgs e)
+        {
+            if (IsMemorySelected())
             {
-                await _controller.BackupServerAsync();
-            }
-            catch
-            {
-                _controller.BackupFailedNotif();
+                ShowBackupList();
             }
         }
 
 
-        private void RestoreServer_Click(object sender, RoutedEventArgs e)
+        private bool IsMemorySelected()
         {
+            OpenFileDialog ofd = new();
+            ofd.Filter = $"Memory Files|*{Config.MemoryFile}";
+            if (ofd.ShowDialog() == true)
+            {
+                ofd.Multiselect = false;
+                string memoryPath = ofd.FileName;
+                try
+                {
+                    string originDiretory = Config.ReadMemoryFile(memoryPath);
+                    string backupDirectory = Path.GetDirectoryName(memoryPath);
 
+                    _controller.SetBackupDirectory(backupDirectory);
+                    _controller.SetOriginDirectory(originDiretory);
+                }
+                catch (FileNotFoundException ex)
+                {
+                    MessageBox.Show($"Could not read the Memory file; Restore failed: {ex}");
+                }
+                return true;
+            }
+
+            return false;
+        }
+        private void ShowBackupList()
+        {
+            _backupList.Clear();
+            var backups = Directory.GetDirectories(Config.BackupDirectory).ToList();
+            if (backups.Count == 0)
+            {
+                MessageBox.Show("Could not find any backups");
+                return;
+            }
+
+            ListBorder.Visibility = Visibility.Visible;
+
+            foreach (var dir in backups)
+            {
+                DirectoryInfo di = new DirectoryInfo(dir);
+                _backupList.Add(di);
+                BackupList.Items.Add(di.Name);
+            }
+        }
+
+        private async void BackupList_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            int selectedIndex = BackupList.SelectedIndex;
+            _controller.SetTargetBackupDir(_backupList[selectedIndex].FullName);
+
+            _backupList.Clear();
+            BackupList.Items.Clear();
+            ListBorder.Visibility = Visibility.Collapsed;
+
+            await _controller.SwitchStateAsync(State.Restore);
         }
     }
 }
