@@ -114,9 +114,9 @@ namespace ServerManager
             {
                 lock (_lock)
                 {
-                    Console.WriteLine($"Backup successful: {backupPath}");
+                    Console.WriteLine($"Backup successful: {backupPath}\n");
                     File.AppendAllText(Config.LogFilePath,
-                        $"[{DateTime.Now}] Backup successful: {backupPath}");
+                        $"[{DateTime.Now}] Backup successful: {backupPath}\n");
                 }
             });
         }
@@ -126,10 +126,10 @@ namespace ServerManager
             {
                 lock (_lock)
                 {
-                    Console.WriteLine($"Backup failed due to {ex.GetType()}: {ex.Message} \n");
+                    Console.WriteLine($"Backup failed due to {ex.GetType()}: {ex.Message}\n");
                     Console.WriteLine(ex.StackTrace);
                     File.AppendAllText($"{Config.SelectedBackupDir}\\{Config.LogFilePath}",
-                        $"[{DateTime.Now}] Backup failed due to {ex.GetType()}: {ex.Message} \n");
+                        $"[{DateTime.Now}] Backup failed due to {ex.GetType()}: {ex.Message}\n");
                 }
             });
         }
