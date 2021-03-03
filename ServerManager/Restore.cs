@@ -11,6 +11,7 @@ namespace ServerManager
         //private string _backupDirectory = Config.BackupDirectory;
         private string _selectedBackup = string.Empty;
         private string _temp_dir = string.Empty;
+        private object _lock = new object();
 
         public delegate void RestoreStartedHandler();
         public delegate void RestoreCompletedHandler(string backupName);
@@ -26,20 +27,45 @@ namespace ServerManager
             Config.RobocopyFailed += Config_RobocopyFailed;
         }
 
-        private void Config_RobocopyComplete(Operation operation, string destination)
+        private async void Config_RobocopyComplete(Operation operation, string destination)
         {
-            if (operation == Operation.Restore)
+            switch (operation)
             {
-                //clear origin
-                if (Directory.Exists(Config.OriginDirectory))
-                    Directory.Delete(Config.OriginDirectory, true);
+                case Operation.Restore:
+                    {
+                        ////clear origin
+                        //if (Directory.Exists(Config.OriginDirectory))
+                        //    Directory.Delete(Config.OriginDirectory, true);
 
-                //rename temp dir to origin dir
-                Directory.Move(_temp_dir, Config.OriginDirectory);
 
-                _temp_dir = string.Empty;
+                        //Directory.CreateDirectory(Config.OriginDirectory);
+                        //await Config.RobocopyAsync(Operation.Rename, _temp_dir, Config.OriginDirectory);
 
-                Complete?.Invoke(destination);
+                        //Directory.CreateDirectory(Config.OriginDirectory);
+                        //rename temp dir to origin dir
+                        //Directory.Move(_temp_dir, Config.OriginDirectory);
+                        //Directory.Delete(_temp_dir, true);
+
+                        //_temp_dir = string.Empty;
+
+
+                        Complete?.Invoke(Config.OriginDirectory);
+                        break;
+                    }
+                case Operation.Rename:
+                    {
+                        lock (_lock)
+                        {
+
+                            Directory.Delete(_temp_dir, true);
+                            //_temp_dir = string.Empty;
+
+                            Complete?.Invoke(Config.OriginDirectory);
+                        }
+                        break;
+                    }
+                default:
+                    break;
             }
         }
         private void Config_RobocopyFailed(Operation operation, Exception ex)
@@ -65,16 +91,19 @@ namespace ServerManager
                     if (Directory.Exists(_temp_dir))
                         Directory.Delete(_temp_dir, true);
 
-                    Directory.CreateDirectory(_temp_dir);
+                    //Directory.CreateDirectory(_temp_dir);
 
                     //copy backup to the temp dir
-                    Config.RobocopyComplete += Config_RobocopyComplete;
-                    Config.RobocopyFailed += Config_RobocopyFailed;
-                    await Config.RobocopyAsync(Operation.Restore, _selectedBackup, _temp_dir);
+                    //await Config.RobocopyAsync(Operation.Restore, _selectedBackup, _temp_dir);
+                    // 
+                    //clear origin
+                    if (Directory.Exists(Config.OriginDirectory))
+                        Directory.Delete(Config.OriginDirectory, true);
+                    await Config.RobocopyAsync(Operation.Restore, _selectedBackup, Config.OriginDirectory);
                 }
                 catch (Exception ex)
                 {
-                    _temp_dir = string.Empty;
+                    //_temp_dir = string.Empty;
                     Failed?.Invoke(ex);
                     throw;
                 }

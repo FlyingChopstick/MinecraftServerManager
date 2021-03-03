@@ -13,6 +13,7 @@ namespace CommonFunctionality
     {
         Backup = 0,
         Restore = 1,
+        Rename = 2
     }
 
     public static class Config
@@ -125,19 +126,20 @@ namespace CommonFunctionality
 
         public static async Task RobocopyAsync(Operation operation, string source, string destination)
         {
-            bool res = await Task.Run(() =>
+            Process robocopy = new Process();
+            robocopy.StartInfo.FileName = Config.RobocopyExe;
+            robocopy.StartInfo.Arguments = $"\"{source}\" " + $"\"{destination}\" " + Config.RobocopyArgs;
+            robocopy.StartInfo.CreateNoWindow = true;
+            robocopy.StartInfo.UseShellExecute = false;
+            bool res = false;
+            res = await Task.Run(() =>
             {
                 try
                 {
                     //robocopy the source directory into new backup directory
-                    Process robocopy = new Process();
-                    robocopy.StartInfo.FileName = Config.RobocopyExe;
-                    robocopy.StartInfo.Arguments = $"\"{source}\" " + $"\"{destination}\" " + Config.RobocopyArgs;
-                    robocopy.StartInfo.CreateNoWindow = true;
-                    robocopy.StartInfo.UseShellExecute = false;
 
                     robocopy.Start();
-                    robocopy.Exited += Robocopy_Exited;
+                    //robocopy.Exited += Robocopy_Exited;
                     return true;
                     //robocopy.WaitForExit();
                 }
@@ -152,11 +154,22 @@ namespace CommonFunctionality
 
             if (res)
                 RobocopyComplete?.Invoke(operation, destination);
+            //if (res)
+            //{
+            //    await Task.Run(() =>
+            //    {
+            //        bool shouldCheck = !robocopy.HasExited;
+            //        while (shouldCheck)
+            //        {
+            //            shouldCheck = !robocopy.HasExited;
+            //        }
+            //        RobocopyComplete?.Invoke(operation, destination);
+            //    });
+            //}
         }
 
         public static void Robocopy_Exited(object sender, EventArgs e)
         {
-            throw new NotImplementedException();
         }
     }
 }
