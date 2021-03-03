@@ -7,8 +7,8 @@ namespace ServerManager
 {
     public class Restore
     {
-        //private string _originDirectory = Config.OriginDirectory;
-        //private string _backupDirectory = Config.BackupDirectory;
+        //private string _originDirectory = Config.SelectedServerDir;
+        //private string _backupDirectory = Config.SelectedBackupDir;
         private string _selectedBackup = string.Empty;
         private string _temp_dir = string.Empty;
         private object _lock = new object();
@@ -27,29 +27,29 @@ namespace ServerManager
             Config.RobocopyFailed += Config_RobocopyFailed;
         }
 
-        private async void Config_RobocopyComplete(Operation operation, string destination)
+        private void Config_RobocopyComplete(Operation operation, string destination)
         {
             switch (operation)
             {
                 case Operation.Restore:
                     {
                         ////clear origin
-                        //if (Directory.Exists(Config.OriginDirectory))
-                        //    Directory.Delete(Config.OriginDirectory, true);
+                        //if (Directory.Exists(Config.SelectedServerDir))
+                        //    Directory.Delete(Config.SelectedServerDir, true);
 
 
-                        //Directory.CreateDirectory(Config.OriginDirectory);
-                        //await Config.RobocopyAsync(Operation.Rename, _temp_dir, Config.OriginDirectory);
+                        //Directory.CreateDirectory(Config.SelectedServerDir);
+                        //await Config.RobocopyAsync(Operation.Rename, _temp_dir, Config.SelectedServerDir);
 
-                        //Directory.CreateDirectory(Config.OriginDirectory);
+                        //Directory.CreateDirectory(Config.SelectedServerDir);
                         //rename temp dir to origin dir
-                        //Directory.Move(_temp_dir, Config.OriginDirectory);
+                        //Directory.Move(_temp_dir, Config.SelectedServerDir);
                         //Directory.Delete(_temp_dir, true);
 
                         //_temp_dir = string.Empty;
 
 
-                        Complete?.Invoke(Config.OriginDirectory);
+                        Complete?.Invoke(Config.SelectedServerDir);
                         break;
                     }
                 case Operation.Rename:
@@ -60,7 +60,7 @@ namespace ServerManager
                             Directory.Delete(_temp_dir, true);
                             //_temp_dir = string.Empty;
 
-                            Complete?.Invoke(Config.OriginDirectory);
+                            Complete?.Invoke(Config.SelectedServerDir);
                         }
                         break;
                     }
@@ -87,7 +87,7 @@ namespace ServerManager
                 try
                 {
                     //create temp dir
-                    _temp_dir = $"{Config.OriginDirectory}_temp";
+                    _temp_dir = $"{Config.SelectedServerDir}_temp";
                     if (Directory.Exists(_temp_dir))
                         Directory.Delete(_temp_dir, true);
 
@@ -97,9 +97,9 @@ namespace ServerManager
                     //await Config.RobocopyAsync(Operation.Restore, _selectedBackup, _temp_dir);
                     // 
                     //clear origin
-                    if (Directory.Exists(Config.OriginDirectory))
-                        Directory.Delete(Config.OriginDirectory, true);
-                    await Config.RobocopyAsync(Operation.Restore, _selectedBackup, Config.OriginDirectory);
+                    if (Directory.Exists(Config.SelectedServerDir))
+                        Directory.Delete(Config.SelectedServerDir, true);
+                    await Config.RobocopyAsync(Operation.Restore, _selectedBackup, Config.SelectedServerDir);
                 }
                 catch (Exception ex)
                 {
