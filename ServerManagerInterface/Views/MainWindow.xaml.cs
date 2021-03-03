@@ -13,21 +13,15 @@ namespace ServerManagerInterface
     /// </summary>
     public partial class MainWindow : Window
     {
-        private InterfaceController _controller;
-        private InterfaceModel _model;
-
-        private List<DirectoryInfo> _backupList;
-        private int _selectedIndex;
+        private readonly InterfaceController _controller;
+        private readonly InterfaceModel _model;
+        private readonly List<DirectoryInfo> _backupList;
 
         public MainWindow()
         {
             _model = new();
             _controller = new(_model);
-
             _backupList = new();
-            _selectedIndex = 0;
-            //_controller.ServerStarted += ServerStartedHandler;
-            //_controller.ServerStopped += ServerStoppedHandler;
 
             _controller.ControlsUpdated += ControlsUpdatedHander;
 
@@ -51,6 +45,9 @@ namespace ServerManagerInterface
                 RestoreServer.IsEnabled = _model.ControlsEnabled;
 
                 StartServer.Content = _model.StartBtnContent;
+                SelectedServer.Text = _model.SelectedServerMessage;
+                BackupDirectory.Text = _model.BackupDirectoryMessage;
+
                 BackupServer.Content = _model.BackupBtnContent;
                 RestoreServer.Content = _model.RestoreBtnContent;
             });
@@ -78,7 +75,7 @@ namespace ServerManagerInterface
         }
 
 
-        private bool IsMemorySelected()
+        private static bool IsMemorySelected()
         {
             OpenFileDialog ofd = new();
             ofd.Filter = $"Memory Files|*{Config.MemoryFile}";
@@ -91,8 +88,8 @@ namespace ServerManagerInterface
                     string originDiretory = Config.ReadMemoryFile(memoryPath);
                     string backupDirectory = Path.GetDirectoryName(memoryPath);
 
-                    _controller.SetBackupDirectory(backupDirectory);
-                    _controller.SetOriginDirectory(originDiretory);
+                    InterfaceController.SetBackupDirectory(backupDirectory);
+                    InterfaceController.SetOriginDirectory(originDiretory);
                 }
                 catch (FileNotFoundException ex)
                 {
@@ -106,7 +103,7 @@ namespace ServerManagerInterface
         private void ShowBackupList()
         {
             _backupList.Clear();
-            var backups = Directory.GetDirectories(Config.BackupDirectory).ToList();
+            var backups = Directory.GetDirectories(Config.SelectedBackupDir).ToList();
             if (backups.Count == 0)
             {
                 MessageBox.Show("Could not find any backups");
@@ -133,6 +130,15 @@ namespace ServerManagerInterface
             ListBorder.Visibility = Visibility.Collapsed;
 
             await _controller.SwitchStateAsync(State.Restore);
+        }
+
+        private void SelectedServer_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            _controller.ChangeActiveServer();
+        }
+        private void BackupDirectory_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            _controller.ChangeBackupDirectory();
         }
     }
 }

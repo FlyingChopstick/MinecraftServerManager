@@ -24,21 +24,21 @@ namespace ServerManager
         {
             return Task.Run(() =>
             {
-                if (!Directory.Exists(Config.OriginDirectory))
+                if (!Directory.Exists(Config.SelectedServerDir))
                 {
                     DirectoryNotFoundException ex = new("Could not find the server directory, closing.");
                     Crashed?.Invoke(ex);
                     return;
                 }
 
-                Directory.SetCurrentDirectory(Config.OriginDirectory);
+                Directory.SetCurrentDirectory(Config.SelectedServerDir);
 
-                Config.CreateMemoryFile(Config.OriginDirectory, Config.BackupDirectory);
+                //Config.CreateMemoryFile(Config.SelectedServerDir, Config.SelectedBackupDir);
 
                 //launch the server
                 _server = new Process();
 
-                _server.StartInfo.WorkingDirectory = Config.OriginDirectory;
+                _server.StartInfo.WorkingDirectory = Config.SelectedServerDir;
 
                 _server.StartInfo.FileName = "cmd.exe";
                 _server.StartInfo.Arguments = "/C " +

@@ -1,6 +1,8 @@
 ﻿using CommonFunctionality;
+using Microsoft.Win32;
 using ServerManager;
 using System;
+using System.IO;
 using System.Threading.Tasks;
 using System.Windows;
 
@@ -15,14 +17,15 @@ namespace ServerManagerInterface.Controllers
     }
     public class InterfaceController
     {
-
         private State _state;
 
         private readonly InterfaceModel _model;
-
         private readonly Start _start;
         private readonly Backup _backup;
         private readonly Restore _restore;
+
+        private bool _isServerSelected;
+        private bool _isBackupSelected;
 
         //public delegate void ServerStatusUpdHandler();
         //public delegate void ServerCrashedHandler(Exception ex);
@@ -33,6 +36,16 @@ namespace ServerManagerInterface.Controllers
         public InterfaceController(InterfaceModel model)
         {
             _model = model;
+
+
+            _isServerSelected = Config.SelectedServerName != Config.NoServerSelected;
+            _model.SelectedServerMessage = Config.SelectedServerName;
+
+
+            _isBackupSelected = Config.BackupDirMessage != Config.NoBackupSelected;
+            _model.BackupDirectoryMessage = Config.BackupDirMessage;
+
+
             _state = State.Idle;
 
             _start = new();
@@ -47,7 +60,6 @@ namespace ServerManagerInterface.Controllers
 
             _restore.Complete += RestoreCompleteHandlerAsync;
             _restore.Failed += RestoreFailedHandlerAsync;
-
         }
 
 
@@ -110,13 +122,14 @@ namespace ServerManagerInterface.Controllers
             }
         }
 
-        public void SetBackupDirectory(string directoryPath)
+
+        public static void SetBackupDirectory(string directoryPath)
         {
-            Config.BackupDirectory = directoryPath;
+            Config.SelectedBackupDir = directoryPath;
         }
-        public void SetOriginDirectory(string directoryPath)
+        public static void SetOriginDirectory(string directoryPath)
         {
-            Config.OriginDirectory = directoryPath;
+            Config.SelectedServerDir = directoryPath;
         }
         public void SetTargetBackupDir(string backupDir)
         {
@@ -124,17 +137,113 @@ namespace ServerManagerInterface.Controllers
         }
 
 
-        private async Task StartServerAsync()
+        public bool ChangeActiveServer()
         {
-            await _start.StartServerAsync();
+            OpenFileDialog ofd = new();
+            ofd.Filter = $"Marker files|*{Config.MarkerFile}";
+            if (ofd.ShowDialog() == true)
+            {
+                ofd.Multiselect = false;
+                string markerPath = ofd.FileName;
+                string markerDir = Path.GetDirectoryName(markerPath);
+                string markerDirName = Path.GetFileName(markerDir);
+
+                Config.SelectedServerDir = markerDir;
+                Config.SelectedServerDir = markerDir;
+                _model.SelectedServerMessage = $"Selected server: {markerDirName}";
+                _isServerSelected = true;
+                ControlsUpdated?.Invoke();
+
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
-        private async Task BackupServerAsync()
+        public bool ChangeBackupDirectory()
         {
-            await _backup.BackupServerAsync();
+            OpenFileDialog ofd = new();
+            ofd.Filter = $"Marker files|*{Config.MarkerFile}";
+            if (ofd.ShowDialog() == true)
+            {
+                ofd.Multiselect = false;
+                string markerPath = ofd.FileName;
+                string markerDir = Path.GetDirectoryName(markerPath);
+                string markerDirName = Path.GetFileName(markerDir);
+
+                Config.SelectedBackupDir = markerDir; ;
+                _model.BackupDirectoryMessage = $"Backup directory: {markerDirName}";
+                _isBackupSelected = true;
+                ControlsUpdated?.Invoke();
+
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
-        private async Task RestoreBackupAsync()
+
+
+        bool CheckServerSelected()
         {
-            await _restore.RestoreBackupAsync();
+            if (!_isServerSelected)
+            {
+                MessageBox.Show(caption: "Server marker selection",
+                    messageBoxText: "Server marker is not selected. Please tell where the server is located.",
+                    icon: MessageBoxImage.Information,
+                    button: MessageBoxButton.OK);
+
+
+                if (!ChangeActiveServer())
+                    //TODO display error message
+                    return false;
+            }
+            return true;
+        }
+        bool CheckBackupDirSelected()
+        {
+            if (!_isBackupSelected)
+            {
+                MessageBox.Show(caption: "Backup marker selection",
+                    messageBoxText: "Backup marker is not selected. Please tell where the backup directory is located.",
+                    icon: MessageBoxImage.Information,
+                    button: MessageBoxButton.OK);
+
+
+                if (!ChangeBackupDirectory())
+                    //TODO display error message
+                    return false;
+            }
+            return true;
+        }
+
+
+        private Task StartServerAsync()
+        {
+            if (!CheckServerSelected())
+            {
+                return SwitchStateAsync(State.Idle);
+            }
+            return _start.StartServerAsync();
+        }
+        private Task BackupServerAsync()
+        {
+            if (!CheckServerSelected()
+                || !CheckBackupDirSelected())
+            {
+                return SwitchStateAsync(State.Idle);
+            }
+            return _backup.BackupServerAsync();
+        }
+        private Task RestoreBackupAsync()
+        {
+            if (!CheckServerSelected())
+            {
+                return SwitchStateAsync(State.Idle);
+            }
+            return _restore.RestoreBackupAsync();
         }
 
 

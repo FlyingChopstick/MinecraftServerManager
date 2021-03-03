@@ -46,7 +46,9 @@ namespace ServerManager
             Started?.Invoke();
             return Task.Run(async () =>
             {
-                var backupDirInfo = new DirectoryInfo(Config.BackupDirectory);
+                var backupDirExtra = $"{Config.SelectedBackupDir}\\{Path.GetFileName(Config.SelectedServerDir)}";
+
+                var backupDirInfo = new DirectoryInfo(backupDirExtra);
 
                 //if directory does not exist, create it
                 if (!backupDirInfo.Exists)
@@ -79,21 +81,21 @@ namespace ServerManager
                     }
                 }
 
-                Config.CreateMemoryFile(Config.OriginDirectory, Config.BackupDirectory);
+                Config.CreateMemoryFile(Config.SelectedServerDir, backupDirExtra);
 
 
                 string backupName = $"{Config.BackupFormat}{DateTime.Now.ToString(Config.DateTimeFormat)}";
-                string backupPath = $"{Config.BackupDirectory}\\{backupName}";
+                string backupPath = $"{backupDirExtra}\\{backupName}";
                 try
                 {
                     //create a new backup directory
                     var newBackupDirInfo = Directory.CreateDirectory(backupPath);
 
 
-                    //Config.Robocopy(Config.OriginDirectory, backupPath);
-                    await Config.RobocopyAsync(Operation.Backup, Config.OriginDirectory, backupPath);
+                    //Config.Robocopy(Config.SelectedServerDir, backupPath);
+                    await Config.RobocopyAsync(Operation.Backup, Config.SelectedServerDir, backupPath);
 
-                    //RobocopyAsync(Config.OriginDirectory, backupPath);
+                    //RobocopyAsync(Config.SelectedServerDir, backupPath);
                     return backupPath;
                 }
                 catch (Exception ex)
@@ -126,7 +128,7 @@ namespace ServerManager
                 {
                     Console.WriteLine($"Backup failed due to {ex.GetType()}: {ex.Message} \n");
                     Console.WriteLine(ex.StackTrace);
-                    File.AppendAllText($"{Config.BackupDirectory}\\{Config.LogFilePath}",
+                    File.AppendAllText($"{Config.SelectedBackupDir}\\{Config.LogFilePath}",
                         $"[{DateTime.Now}] Backup failed due to {ex.GetType()}: {ex.Message} \n");
                 }
             });
