@@ -1,6 +1,7 @@
 ﻿using CommonFunctionality;
 using Microsoft.Win32;
 using ServerManagerInterface.Controllers;
+using ServerManagerInterface.Views;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -16,6 +17,7 @@ namespace ServerManagerInterface
         private readonly InterfaceController _controller;
         private readonly InterfaceModel _model;
         private readonly List<DirectoryInfo> _backupList;
+        private Window _lockerWindow;
 
         public MainWindow()
         {
@@ -24,6 +26,8 @@ namespace ServerManagerInterface
             _backupList = new();
 
             _controller.ControlsUpdated += ControlsUpdatedHander;
+
+            _lockerWindow = new LockerWindow(_controller);
 
             this.DataContext = _model;
 
@@ -61,6 +65,7 @@ namespace ServerManagerInterface
         private async void StartServer_Click(object sender, RoutedEventArgs e)
         {
             await _controller.SwitchStateAsync(State.Running);
+            _lockerWindow.Show();
         }
         private async void BackupServer_Click(object sender, RoutedEventArgs e)
         {
