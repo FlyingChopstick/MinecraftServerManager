@@ -89,5 +89,3 @@ jobs:
     # Remove the pfx
     - name: Remove the pfx
       run: Remove-Item -path $env:Wap_Project_Directory\$env:Signing_Certificate
-
-        name: MSIX Package        path: ${{ env.Wap_Project_Directory }}\AppPackages
