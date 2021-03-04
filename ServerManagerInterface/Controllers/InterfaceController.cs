@@ -71,7 +71,7 @@ namespace ServerManagerInterface.Controllers
         /// </summary>
         /// <param name="newState"></param>
         /// <returns></returns>
-        public async Task SwitchStateAsync(State newState)
+        public asnc Task SwitchStateAsync(State newState)
         {
             _state = newState;
             //update controls
