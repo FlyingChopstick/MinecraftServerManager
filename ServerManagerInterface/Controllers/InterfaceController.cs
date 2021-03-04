@@ -92,6 +92,10 @@ namespace ServerManagerInterface.Controllers
                     break;
             }
         }
+
+        /// <summary>
+        /// Updates the contents of buttons
+        /// </summary>
         public void UpdateControls()
         {
             switch (_state)
