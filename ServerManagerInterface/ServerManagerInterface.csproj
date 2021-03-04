@@ -8,6 +8,7 @@
 
 
 
+
   <ItemGroup>
     <None Include="..\CommonFunctionality\App.config" Link="App.config" />
   </ItemGroup>
@@ -15,6 +16,7 @@
   <ItemGroup>
     <PackageReference Include="Simple.Wpf.Terminal" Version="2.3.15" />
   </ItemGroup>
+
 
   <ItemGroup>
     <ProjectReference Include="..\CommonFunctionality\CommonFunctionality.csproj" />

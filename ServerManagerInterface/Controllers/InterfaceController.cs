@@ -33,6 +33,9 @@ namespace ServerManagerInterface.Controllers
         public delegate void ControlsUpdateHandler();
         public event ControlsUpdateHandler ControlsUpdated;
 
+        public delegate void ServerStoppedDelegate();
+        public event ServerStoppedDelegate ServerStopped;
+
         public InterfaceController(InterfaceModel model)
         {
             _model = model;
@@ -249,9 +252,10 @@ namespace ServerManagerInterface.Controllers
 
         private async void ServerStoppedHandlerAsync()
         {
+            ServerStopped?.Invoke();
             await SwitchStateAsync(State.Idle);
         }
-        private async void ServerCrashedHandlerAsync(Exception ex)
+        private void ServerCrashedHandlerAsync(Exception ex)
         {
             MessageBox.Show(
                 caption: "Server crashed",
@@ -259,7 +263,8 @@ namespace ServerManagerInterface.Controllers
                 button: MessageBoxButton.OK,
                 icon: MessageBoxImage.Error
                 );
-            await SwitchStateAsync(State.Idle);
+            //await SwitchStateAsync(State.Idle);
+            ServerStoppedHandlerAsync();
         }
 
         private async void BackupCompleteHandlerAsync(string backupPath)
