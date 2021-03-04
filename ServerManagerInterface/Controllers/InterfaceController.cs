@@ -66,7 +66,11 @@ namespace ServerManagerInterface.Controllers
         }
 
 
-
+        /// <summary>
+        /// Switches the state of the program
+        /// </summary>
+        /// <param name="newState"></param>
+        /// <returns></returns>
         public async Task SwitchStateAsync(State newState)
         {
             _state = newState;
