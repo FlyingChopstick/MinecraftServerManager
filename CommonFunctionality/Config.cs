@@ -35,18 +35,14 @@ namespace CommonFunctionality
         }
         private static readonly Dictionary<ConfigValue, string> ConfigNames = new Dictionary<ConfigValue, string>
         {
-            //{ ConfigValue.OriginDirectory, "Origin Directory" },
-            //{ ConfigValue.BackupDirectory, "Backup Directory" },
-            { ConfigValue.BackupFormat, "Backup Format" },
-            { ConfigValue.BackupMaxCount, "Number of backups" },
-            { ConfigValue.LogFile, "Log File" },
-            { ConfigValue.MemoryFile, "Memory File" },
-            { ConfigValue.MemoryDescription, "Memory Format" },
-            { ConfigValue.DateTimeFormat, "DateTime Format" },
-            { ConfigValue.JarName, "Server JAR name" },
-            { ConfigValue.LaunchOpts, "Server start arguments" },
             { ConfigValue.SelectedServerDir, "Selected Server Directory" },
             { ConfigValue.SelectedBackupDir, "Selected Backup Directory" },
+            { ConfigValue.BackupFormat, "Backup Format" },
+            { ConfigValue.BackupMaxCount, "Number of backups" },
+            { ConfigValue.MemoryFile, "Memory File" },
+            { ConfigValue.MemoryDescription, "Memory Format" },
+            { ConfigValue.LogFile, "Log File" },
+            { ConfigValue.DateTimeFormat, "DateTime Format" },
         };
 
         private static void WriteValue(string key, string value)
@@ -116,7 +112,8 @@ namespace CommonFunctionality
                     return NoBackupSelected;
                 }
 
-                return SelectedBackupDir;
+
+                return $"Backup directory: {SelectedBackupDir}";
             }
         }
 
@@ -124,19 +121,11 @@ namespace CommonFunctionality
         public static string NoBackupSelected => "Backup directory is not selected";
 
 
-        public static string ServerJar { get => ConfigurationManager.AppSettings.Get(ConfigNames[ConfigValue.JarName]); }
-        public static string LaunchOpts { get => ConfigurationManager.AppSettings.Get(ConfigNames[ConfigValue.LaunchOpts]); }
-
-
-        //public static string OriginDirectory { get; set; } = ConfigurationManager.AppSettings.Get(ConfigNames[ConfigValue.OriginDirectory]);
-        //public static string BackupDirectory { get; set; } = ConfigurationManager.AppSettings.Get(ConfigNames[ConfigValue.BackupDirectory]);
-
-
         public static string BackupFormat { get => ConfigurationManager.AppSettings.Get(ConfigNames[ConfigValue.BackupFormat]); }
         public static int BackupMaxCount => Convert.ToInt32(ConfigurationManager.AppSettings.Get(ConfigNames[ConfigValue.BackupMaxCount]));
 
         public static string MemoryFile { get => ConfigurationManager.AppSettings.Get(ConfigNames[ConfigValue.MemoryFile]); }
-        public static string MarkerFile => ".marker";
+        public static string MarkerFile => "marker";
         public static string MemoryDescription { get => ConfigurationManager.AppSettings.Get(ConfigNames[ConfigValue.MemoryDescription]); }
 
 

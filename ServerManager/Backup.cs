@@ -1,8 +1,8 @@
-﻿using CommonFunctionality;
-using System;
+﻿using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using CommonFunctionality;
 
 namespace ServerManager
 {
@@ -108,15 +108,22 @@ namespace ServerManager
             });
         }
 
-        private Task LogBackupSuccessAsync(string backupPath)
+        private async Task LogBackupSuccessAsync(string backupPath)
         {
-            return Task.Run(() =>
+            await Task.Run(() =>
             {
-                lock (_lock)
+                try
                 {
-                    Console.WriteLine($"Backup successful: {backupPath}\n");
-                    File.AppendAllText(Config.LogFilePath,
-                        $"[{DateTime.Now}] Backup successful: {backupPath}\n");
+                    lock (_lock)
+                    {
+                        Console.WriteLine($"Backup successful: {backupPath}\n");
+                        File.AppendAllText(Config.LogFilePath,
+                            $"[{DateTime.Now}] Backup successful: {backupPath}\n");
+                    }
+                }
+                catch (Exception)
+                {
+
                 }
             });
         }

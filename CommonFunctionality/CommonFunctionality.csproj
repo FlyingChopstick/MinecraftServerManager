@@ -5,7 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="App.config" />
+    <None Include="..\ServerManagerInterface\App.config" Link="App.config" />
   </ItemGroup>
 
 

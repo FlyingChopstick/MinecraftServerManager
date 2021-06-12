@@ -1,8 +1,7 @@
-﻿using CommonFunctionality;
-using System;
-using System.Diagnostics;
+﻿using System;
 using System.IO;
 using System.Threading.Tasks;
+using CommonFunctionality;
 
 namespace ServerManager
 {
@@ -13,15 +12,17 @@ namespace ServerManager
         public event ServerStatusHandler Stopped;
         public event ServerCrashHandler Crashed;
 
-        private Process _server;
+        //private Process _server;
+        //private Server server;
 
         public Start()
         {
-
+            Server.Exited += Server_Exited;
         }
 
         public Task StartServerAsync()
         {
+
             return Task.Run(() =>
             {
                 if (!Directory.Exists(Config.SelectedServerDir))
@@ -33,23 +34,20 @@ namespace ServerManager
 
                 Directory.SetCurrentDirectory(Config.SelectedServerDir);
 
-                //Config.CreateMemoryFile(Config.SelectedServerDir, Config.SelectedBackupDir);
+                var marker = Marker.ForDirectory(MarkerType.Server, Config.SelectedServerDir);
 
-                //launch the server
-                _server = new Process();
+                Server.Directory = marker.ServerDir;
+                Server.Arguments = "/C " +
+                marker.JavaPath +
+                " " +
+                marker.LaunchArgs +
+                $" -jar " +
+                marker.ServerJar +
+                " " +
+                marker.Gui;
 
-                _server.StartInfo.WorkingDirectory = Config.SelectedServerDir;
-
-                _server.StartInfo.FileName = "cmd.exe";
-                _server.StartInfo.Arguments = "/C " +
-                "java -d64 " +
-                $"{Config.LaunchOpts} " +
-                $"-jar {Config.ServerJar} nogui";
-
-
-                _server.EnableRaisingEvents = true;
-                _server.Start();
-                _server.Exited += Server_Exited;
+                Server.Exited += Server_Exited;
+                Server.Start();
             });
         }
 

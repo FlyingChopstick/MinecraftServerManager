@@ -1,7 +1,7 @@
-﻿using ServerManagerInterface.Controllers;
-using ServerManagerInterface.Models;
-using System.Threading.Tasks;
+﻿using System;
 using System.Windows;
+using ServerManagerInterface.Controllers;
+using ServerManagerInterface.Models;
 
 namespace ServerManagerInterface.Views
 {
@@ -13,6 +13,8 @@ namespace ServerManagerInterface.Views
         readonly LockerWindowModel _model;
         readonly LockerWindowController _controller;
 
+        readonly Window _parent;
+
         public LockerWindow(InterfaceController parentController)
         {
             _model = new();
@@ -20,11 +22,23 @@ namespace ServerManagerInterface.Views
 
             parentController.ServerStopped += ParentController_ServerStopped;
 
+            _parent = Application.Current.MainWindow;
+            _parent.StateChanged += ParentWindowStateChanged;
+
             this.DataContext = _model;
             _controller.ControlsUnlocked += Controller_ControlsUnlocked;
 
             InitializeComponent();
             UpdateControls();
+        }
+
+        private void ParentWindowStateChanged(object sender, System.EventArgs e)
+        {
+            this.WindowState = _parent.WindowState;
+        }
+        protected override void OnStateChanged(EventArgs e)
+        {
+            _parent.WindowState = this.WindowState;
         }
 
         private void UpdateControls()

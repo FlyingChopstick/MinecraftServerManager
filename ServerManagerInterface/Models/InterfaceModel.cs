@@ -18,6 +18,7 @@ namespace ServerManagerInterface
         public bool ControlsEnabled { get; set; } = true;
 
         public string StartBtnContent { get; set; }
+
         public string SelectedServerMessage { get; set; }
         public string BackupDirectoryMessage { get; set; }
 
