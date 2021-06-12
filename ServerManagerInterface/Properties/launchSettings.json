@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "ServerManagerInterface": {
+      "commandName": "Project",
+      "commandLineArgs": "--silent"
+    }
+  }
+}

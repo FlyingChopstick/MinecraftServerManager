@@ -1,10 +1,10 @@
-﻿using CommonFunctionality;
-using Microsoft.Win32;
-using ServerManager;
-using System;
+﻿using System;
 using System.IO;
 using System.Threading.Tasks;
 using System.Windows;
+using CommonFunctionality;
+using Microsoft.Win32;
+using ServerManager;
 
 namespace ServerManagerInterface.Controllers
 {
@@ -239,14 +239,15 @@ namespace ServerManagerInterface.Controllers
             }
             return _start.StartServerAsync();
         }
-        private Task BackupServerAsync()
+        private async Task BackupServerAsync()
         {
             if (!CheckServerSelected()
                 || !CheckBackupDirSelected())
             {
-                return SwitchStateAsync(State.Idle);
+                await SwitchStateAsync(State.Idle);
             }
-            return _backup.BackupServerAsync();
+            await _backup.BackupServerAsync();
+            await SwitchStateAsync(State.Idle);
         }
         private Task RestoreBackupAsync()
         {

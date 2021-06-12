@@ -156,6 +156,29 @@ namespace CommonFunctionality
         public static string RobocopyArgs { get => "/E /it"; }
 
 
+        public static bool IsJava15Required
+        {
+            get
+            {
+                if (!Directory.Exists(SelectedServerDir))
+                {
+                    throw new DirectoryNotFoundException("Server directory not found");
+                }
+
+                var marker = Directory.GetFiles(SelectedServerDir).Where(f => f.Contains(MarkerFile)).FirstOrDefault();
+
+                if (marker == string.Empty)
+                {
+                    throw new FileNotFoundException("Server marker not found");
+                }
+
+
+                return File.ReadAllText(marker).Contains("Java 15 Required = true");
+            }
+        }
+        public static string Java15Path => Environment.GetEnvironmentVariable("JDK15");
+
+
         /// <summary>
         /// Creates a Memory file describing the path to the origin folder
         /// </summary>

@@ -1,8 +1,8 @@
-﻿using CommonFunctionality;
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
+using CommonFunctionality;
 
 namespace ServerManager
 {
@@ -22,6 +22,7 @@ namespace ServerManager
 
         public Task StartServerAsync()
         {
+
             return Task.Run(() =>
             {
                 if (!Directory.Exists(Config.SelectedServerDir))
@@ -40,12 +41,15 @@ namespace ServerManager
 
                 _server.StartInfo.WorkingDirectory = Config.SelectedServerDir;
 
-                _server.StartInfo.FileName = "cmd.exe";
+                _server.StartInfo.FileName = "cmd";
+
+                string javaPath = Config.IsJava15Required ? Config.Java15Path : "java";
+
                 _server.StartInfo.Arguments = "/C " +
-                "java -d64 " +
+                javaPath +
+                " " + //"java -d64 " +
                 $"{Config.LaunchOpts} " +
                 $"-jar {Config.ServerJar} nogui";
-
 
                 _server.EnableRaisingEvents = true;
                 _server.Start();
