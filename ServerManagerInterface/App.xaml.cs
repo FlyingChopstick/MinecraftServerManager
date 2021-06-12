@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Windows;
+using CommonFunctionality;
 using ServerManager;
 
 namespace ServerManagerInterface
@@ -11,13 +12,15 @@ namespace ServerManagerInterface
     {
         private void StartupAsync(object sender, StartupEventArgs e)
         {
-            Backup backup = new();
-            backup.Failed += Backup_Failed;
-            backup.Complete += Backup_Complete;
+
+
+            //Backup backup = new();
+            //backup.Failed += Backup_Failed;
+            //backup.Complete += Backup_Complete;
             //await backup.BackupServerAsync();
         }
 
-        private async void Backup_Complete(string path)
+        private void Backup_Complete(string path)
         {
             //Start start = new();
             //await start.StartServerAsync();

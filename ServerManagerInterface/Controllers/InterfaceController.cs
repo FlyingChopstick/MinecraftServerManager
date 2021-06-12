@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using CommonFunctionality;
@@ -48,6 +49,8 @@ namespace ServerManagerInterface.Controllers
             _isBackupSelected = Config.BackupDirMessage != Config.NoBackupSelected;
             _model.BackupDirectoryMessage = Config.BackupDirMessage;
 
+            //Config.ServerMarker = Marker.ForDirectory(MarkerType.Server, Config.SelectedServerDir);
+            //Config.ServerMarker.ParseMarker();
 
             _state = State.Idle;
 
@@ -150,28 +153,40 @@ namespace ServerManagerInterface.Controllers
 
         public bool ChangeActiveServer()
         {
-            OpenFileDialog ofd = new();
-            ofd.Filter = $"Marker files|*{Config.MarkerFile}";
-            if (ofd.ShowDialog() == true)
+            OpenFileDialog jarSelectionDialog = new();
+            jarSelectionDialog.Filter = "JAR files|*.jar";
+            jarSelectionDialog.Multiselect = false;
+            if (jarSelectionDialog.ShowDialog() == true)
             {
-                ofd.Multiselect = false;
-                string markerPath = ofd.FileName;
-                string markerDir = Path.GetDirectoryName(markerPath);
-                string markerDirName = Path.GetFileName(markerDir);
+                string jarPath = jarSelectionDialog.FileName;
+                string jarDir = Path.GetDirectoryName(jarPath);
+                string jarDirName = Path.GetFileName(jarDir);
 
-                Config.SelectedServerDir = markerDir;
-                Config.SelectedServerDir = markerDir;
-                _model.SelectedServerMessage = $"Selected server: {markerDirName}";
+                Config.SelectedServerDir = jarDir;
+                //Config.ServerJar = jarPath;
+                _model.SelectedServerMessage = Config.SelectedServerName;
                 _isServerSelected = true;
                 ControlsUpdated?.Invoke();
 
+                string markerPath = Directory.GetFiles(jarDir).Where(f => f.Contains(Config.MarkerFile)).FirstOrDefault();
+                if (markerPath == default)
+                {
+                    markerPath = $"{jarDir}\\server.{Config.MarkerFile}";
+                }
+
+                UpdateServerMarker(markerPath);
+
                 return true;
             }
-            else
-            {
-                return false;
-            }
+            return false;
         }
+
+        private static void UpdateServerMarker(string markerPath)
+        {
+            Config.ServerMarker = new(MarkerType.Server, markerPath);
+            Config.ServerMarker.ParseMarker();
+        }
+
         public bool ChangeBackupDirectory()
         {
             OpenFileDialog ofd = new();

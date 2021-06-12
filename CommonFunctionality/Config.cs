@@ -124,9 +124,21 @@ namespace CommonFunctionality
         public static string NoBackupSelected => "Backup directory is not selected";
 
 
-        public static string ServerJar { get => ConfigurationManager.AppSettings.Get(ConfigNames[ConfigValue.JarName]); }
-        public static string LaunchOpts { get => ConfigurationManager.AppSettings.Get(ConfigNames[ConfigValue.LaunchOpts]); }
+        public static string ServerJar
+        {
+            get
+            {
+                return Path.GetFileName(
+                    Directory.GetFiles(SelectedServerDir)
+                    .Where(f => f.Contains(".jar"))
+                    .FirstOrDefault());
+            }
+        }// => ConfigurationManager.AppSettings.Get(ConfigNames[ConfigValue.JarName]); }
 
+
+        public static string LaunchOpts { get; set; }// => ConfigurationManager.AppSettings.Get(ConfigNames[ConfigValue.LaunchOpts]); }
+
+        public static Marker ServerMarker { get; set; }
 
         //public static string OriginDirectory { get; set; } = ConfigurationManager.AppSettings.Get(ConfigNames[ConfigValue.OriginDirectory]);
         //public static string BackupDirectory { get; set; } = ConfigurationManager.AppSettings.Get(ConfigNames[ConfigValue.BackupDirectory]);
@@ -136,7 +148,7 @@ namespace CommonFunctionality
         public static int BackupMaxCount => Convert.ToInt32(ConfigurationManager.AppSettings.Get(ConfigNames[ConfigValue.BackupMaxCount]));
 
         public static string MemoryFile { get => ConfigurationManager.AppSettings.Get(ConfigNames[ConfigValue.MemoryFile]); }
-        public static string MarkerFile => ".marker";
+        public static string MarkerFile => "marker";
         public static string MemoryDescription { get => ConfigurationManager.AppSettings.Get(ConfigNames[ConfigValue.MemoryDescription]); }
 
 
@@ -156,27 +168,30 @@ namespace CommonFunctionality
         public static string RobocopyArgs { get => "/E /it"; }
 
 
-        public static bool IsJava15Required
-        {
-            get
-            {
-                if (!Directory.Exists(SelectedServerDir))
-                {
-                    throw new DirectoryNotFoundException("Server directory not found");
-                }
-
-                var marker = Directory.GetFiles(SelectedServerDir).Where(f => f.Contains(MarkerFile)).FirstOrDefault();
-
-                if (marker == string.Empty)
-                {
-                    throw new FileNotFoundException("Server marker not found");
-                }
+        public static string JavaPath { get; set; }
 
 
-                return File.ReadAllText(marker).Contains("Java 15 Required = true");
-            }
-        }
-        public static string Java15Path => Environment.GetEnvironmentVariable("JDK15");
+        //public static bool IsJava15Required
+        //{
+        //    get
+        //    {
+        //        if (!Directory.Exists(SelectedServerDir))
+        //        {
+        //            throw new DirectoryNotFoundException("Server directory not found");
+        //        }
+
+        //        var marker = Directory.GetFiles(SelectedServerDir).Where(f => f.Contains(MarkerFile)).FirstOrDefault();
+
+        //        if (marker == string.Empty)
+        //        {
+        //            throw new FileNotFoundException("Server marker not found");
+        //        }
+
+
+        //        return File.ReadAllText(marker).Contains("Java 15 Required = true");
+        //    }
+        //}
+        //public static string Java15Path => Environment.GetEnvironmentVariable("JDK15");
 
 
         /// <summary>

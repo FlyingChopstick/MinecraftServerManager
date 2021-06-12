@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using CommonFunctionality;
@@ -13,11 +12,12 @@ namespace ServerManager
         public event ServerStatusHandler Stopped;
         public event ServerCrashHandler Crashed;
 
-        private Process _server;
+        //private Process _server;
+        //private Server server;
 
         public Start()
         {
-
+            Server.Exited += Server_Exited;
         }
 
         public Task StartServerAsync()
@@ -37,23 +37,41 @@ namespace ServerManager
                 //Config.CreateMemoryFile(Config.SelectedServerDir, Config.SelectedBackupDir);
 
                 //launch the server
-                _server = new Process();
 
-                _server.StartInfo.WorkingDirectory = Config.SelectedServerDir;
 
-                _server.StartInfo.FileName = "cmd";
+                //_server = new Process();
+                //_server.StartInfo.WorkingDirectory = Config.SelectedServerDir;
+                //_server.StartInfo.FileName = "cmd";
 
-                string javaPath = Config.IsJava15Required ? Config.Java15Path : "java";
+                ////string javaPath = Config.IsJava15Required ? Config.Java15Path : "java";
 
-                _server.StartInfo.Arguments = "/C " +
-                javaPath +
-                " " + //"java -d64 " +
-                $"{Config.LaunchOpts} " +
-                $"-jar {Config.ServerJar} nogui";
+                //_server.StartInfo.Arguments = "/C " +
+                //Config.JavaPath +
+                //" " +
+                //Config.LaunchOpts +
+                //$" -jar " +
+                //Config.ServerJar +
+                //" nogui";
 
-                _server.EnableRaisingEvents = true;
-                _server.Start();
-                _server.Exited += Server_Exited;
+                //_server.EnableRaisingEvents = true;
+                //_server.Start();
+                //_server.Exited += Server_Exited;
+
+                Config.ServerMarker = Marker.ForDirectory(MarkerType.Server, Config.SelectedServerDir);
+                Config.ServerMarker.ParseMarker();
+
+                string arguments = "/C " +
+                Config.JavaPath +
+                " " +
+                Config.LaunchOpts +
+                $" -jar " +
+                Config.ServerJar +
+                " nogui";
+
+                Server.Directory = Config.SelectedServerDir;
+                Server.Arguments = arguments;
+                Server.Exited += Server_Exited;
+                Server.Start();
             });
         }
 
