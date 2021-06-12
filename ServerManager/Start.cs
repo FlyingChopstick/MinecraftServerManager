@@ -57,18 +57,18 @@ namespace ServerManager
                 //_server.Start();
                 //_server.Exited += Server_Exited;
 
-                Config.ServerMarker = Marker.ForDirectory(MarkerType.Server, Config.SelectedServerDir);
-                Config.ServerMarker.ParseMarker();
+                var marker = Marker.ForDirectory(MarkerType.Server, Config.SelectedServerDir);
+                //marker.ParseMarker();
 
                 string arguments = "/C " +
-                Config.JavaPath +
+                marker.JavaPath +
                 " " +
-                Config.LaunchOpts +
+                marker.LaunchOptions +
                 $" -jar " +
-                Config.ServerJar +
+                marker.ServerJar +
                 " nogui";
 
-                Server.Directory = Config.SelectedServerDir;
+                Server.Directory = marker.ServerDir;
                 Server.Arguments = arguments;
                 Server.Exited += Server_Exited;
                 Server.Start();

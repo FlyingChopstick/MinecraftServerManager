@@ -183,8 +183,8 @@ namespace ServerManagerInterface.Controllers
 
         private static void UpdateServerMarker(string markerPath)
         {
-            Config.ServerMarker = new(MarkerType.Server, markerPath);
-            Config.ServerMarker.ParseMarker();
+            //Config.ServerMarker = new(MarkerType.Server, markerPath);
+            //Config.ServerMarker.ParseMarker();
         }
 
         public bool ChangeBackupDirectory()

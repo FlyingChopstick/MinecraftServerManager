@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 
 namespace CommonFunctionality
@@ -11,19 +10,29 @@ namespace CommonFunctionality
             FilePath = filename;
         }
 
+        public void CreateFile()
+        {
+            if (!Exists)
+            {
+                File.Create(FilePath);
+            }
+        }
         public void Append(List<string> text)
         {
             lock (_lock)
             {
-                try
-                {
-                    File.AppendAllLines(FilePath, text);
-                }
-                catch (Exception)
-                {
-
-                }
+                File.AppendAllLines(FilePath, text);
             }
+        }
+        public List<string> Read()
+        {
+            if (Exists)
+            {
+                return new(File.ReadAllLines(FilePath));
+            }
+
+
+            throw new FileNotFoundException();
         }
 
         public bool Exists => File.Exists(FilePath);
