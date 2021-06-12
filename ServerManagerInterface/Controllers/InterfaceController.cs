@@ -158,9 +158,12 @@ namespace ServerManagerInterface.Controllers
             jarSelectionDialog.Multiselect = false;
             if (jarSelectionDialog.ShowDialog() == true)
             {
+
                 string jarPath = jarSelectionDialog.FileName;
                 string jarDir = Path.GetDirectoryName(jarPath);
                 string jarDirName = Path.GetFileName(jarDir);
+
+                Marker.ForDirectory(MarkerType.Server, jarDir);
 
                 Config.SelectedServerDir = jarDir;
                 //Config.ServerJar = jarPath;

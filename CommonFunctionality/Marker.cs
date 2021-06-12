@@ -28,9 +28,9 @@ namespace CommonFunctionality
         }
         public static readonly Dictionary<string, string> Requirements = new()
         {
-            { LaunchArgs, "-Xms4G -Xmx2G" },
             { JavaPath, EmptyValue },
-            { ShowGui, "false" }
+            { ShowGui, "false" },
+            { LaunchArgs, "-Xms4G -Xmx2G" },
         };
 
         public const string EmptyValue = "none";
@@ -45,7 +45,6 @@ namespace CommonFunctionality
         {
             //ServerDir = Path.GetDirectoryName(filePath);
             FileContract = new(filePath);
-            MarkerSource = FileContract.Read();
 
             switch (type)
             {
@@ -92,7 +91,7 @@ namespace CommonFunctionality
         public MarkerType Type { get; }
 
 
-        private readonly List<string> MarkerSource;
+        private List<string> MarkerSource = new();
 
 
         private void SetupServerMarker()
@@ -100,7 +99,10 @@ namespace CommonFunctionality
             if (!FileContract.Exists)
             {
                 FileContract.Append(MarkerConf.DefaultSettings);
+                return;
             }
+
+            MarkerSource = FileContract.Read();
         }
         private void SetupBackupMarker()
         {
