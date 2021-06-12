@@ -34,42 +34,18 @@ namespace ServerManager
 
                 Directory.SetCurrentDirectory(Config.SelectedServerDir);
 
-                //Config.CreateMemoryFile(Config.SelectedServerDir, Config.SelectedBackupDir);
-
-                //launch the server
-
-
-                //_server = new Process();
-                //_server.StartInfo.WorkingDirectory = Config.SelectedServerDir;
-                //_server.StartInfo.FileName = "cmd";
-
-                ////string javaPath = Config.IsJava15Required ? Config.Java15Path : "java";
-
-                //_server.StartInfo.Arguments = "/C " +
-                //Config.JavaPath +
-                //" " +
-                //Config.LaunchOpts +
-                //$" -jar " +
-                //Config.ServerJar +
-                //" nogui";
-
-                //_server.EnableRaisingEvents = true;
-                //_server.Start();
-                //_server.Exited += Server_Exited;
-
                 var marker = Marker.ForDirectory(MarkerType.Server, Config.SelectedServerDir);
-                //marker.ParseMarker();
-
-                string arguments = "/C " +
-                marker.JavaPath +
-                " " +
-                marker.LaunchOptions +
-                $" -jar " +
-                marker.ServerJar +
-                " nogui";
 
                 Server.Directory = marker.ServerDir;
-                Server.Arguments = arguments;
+                Server.Arguments = "/C " +
+                marker.JavaPath +
+                " " +
+                marker.LaunchArgs +
+                $" -jar " +
+                marker.ServerJar +
+                " " +
+                marker.Gui;
+
                 Server.Exited += Server_Exited;
                 Server.Start();
             });

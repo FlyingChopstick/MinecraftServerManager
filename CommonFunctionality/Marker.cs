@@ -28,20 +28,22 @@ namespace CommonFunctionality
         }
         public static readonly Dictionary<string, string> Requirements = new()
         {
-            { JavaPath, EmptyValue },
             { LaunchArgs, "-Xms4G -Xmx2G" },
+            { JavaPath, EmptyValue },
+            { ShowGui, "false" }
         };
 
         public const string EmptyValue = "none";
         public const string JavaPath = "Custom JRE";
         public const string LaunchArgs = "Launch arguments";
+        public const string ShowGui = "Show GUI";
     }
 
     public class Marker
     {
         public Marker(MarkerType type, string filePath)
         {
-            ServerDir = Path.GetDirectoryName(filePath);
+            //ServerDir = Path.GetDirectoryName(filePath);
             FileContract = new(filePath);
             MarkerSource = FileContract.Read();
 
@@ -76,15 +78,19 @@ namespace CommonFunctionality
 
         public string MarkerPath => FileContract.FilePath;
         public string MarkerName => FileContract.FileName;
-        public string ServerDir { get; }
+        public string ServerDir => FileContract.Directory;
         public string ServerJar => Path.GetFileName(
             Directory.GetFiles(ServerDir)
             .Where(f => f.EndsWith(".jar"))
             .FirstOrDefault());
         public string JavaPath => ParseConfig(MarkerConf.JavaPath, "java");
-        public string LaunchOptions => ParseConfig(MarkerConf.LaunchArgs);
-        public FileContract FileContract { get; private set; }
+        public string LaunchArgs => ParseConfig(MarkerConf.LaunchArgs);
+        public string Gui => ParseConfig(MarkerConf.ShowGui) == "true" ? "" : "nogui";
+
+
+        public FileContract FileContract { get; }
         public MarkerType Type { get; }
+
 
         private readonly List<string> MarkerSource;
 

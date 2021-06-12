@@ -38,6 +38,7 @@ namespace CommonFunctionality
         public bool Exists => File.Exists(FilePath);
         public string FilePath { get; }
         public string FileName => Path.GetFileName(FilePath);
+        public string Directory => Path.GetDirectoryName(FilePath);
         private readonly object _lock = new();
     }
 }

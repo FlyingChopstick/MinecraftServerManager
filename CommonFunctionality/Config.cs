@@ -112,7 +112,8 @@ namespace CommonFunctionality
                     return NoBackupSelected;
                 }
 
-                return SelectedBackupDir;
+
+                return $"Backup directory: {SelectedBackupDir}";
             }
         }
 
