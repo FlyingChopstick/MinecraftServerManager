@@ -16,6 +16,8 @@ namespace ServerManagerInterface
     {
         private readonly InterfaceController _controller;
         private readonly InterfaceModel _model;
+        private LockerWindow _locker;
+
         private readonly List<DirectoryInfo> _backupList;
         //private Window _lockerWindow;
 
@@ -24,15 +26,25 @@ namespace ServerManagerInterface
             _model = new();
             _controller = new(_model);
             _backupList = new();
+            _locker = new(_controller);
 
             _controller.ControlsUpdated += ControlsUpdatedHander;
-
+            _controller.ServerStopped += ServerStoppedHandler;
 
             this.DataContext = _model;
 
             InitializeComponent();
 
             UpdateControls();
+        }
+
+        private void ServerStoppedHandler()
+        {
+            this.Dispatcher.Invoke(() =>
+                {
+                    _locker.Close();
+
+                });
         }
 
         private void ControlsUpdatedHander()
@@ -63,9 +75,8 @@ namespace ServerManagerInterface
 
         private async void StartServer_Click(object sender, RoutedEventArgs e)
         {
-            var lv = new LockerWindow(_controller);
-            lv.Show();
-
+            _locker = new(_controller);
+            _locker.Show();
             await _controller.SwitchStateAsync(State.Running);
         }
         private async void BackupServer_Click(object sender, RoutedEventArgs e)

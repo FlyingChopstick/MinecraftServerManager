@@ -60,12 +60,34 @@ namespace ServerManagerInterface.Controllers
 
             _start.Stopped += ServerStoppedHandlerAsync;
             _start.Crashed += ServerCrashedHandlerAsync;
+            _start.OnEulaCrash += OnEulaCrash;
 
             _backup.Complete += BackupCompleteHandlerAsync;
             _backup.Failed += BackupFailedHandlerAsync;
 
             _restore.Complete += RestoreCompleteHandlerAsync;
             _restore.Failed += RestoreFailedHandlerAsync;
+        }
+
+        private async void OnEulaCrash()
+        {
+            await Task.Run(async () =>
+             {
+                 var res = MessageBox.Show("The EULA is not accepted. " +
+                 "You need to modify the eula.txt file in you server directory. " +
+                 "Press OK when you're done.",
+                 caption: "EULA not accepted",
+                 button: MessageBoxButton.OKCancel);
+
+                 if (res == MessageBoxResult.Cancel)
+                 {
+                     ServerStoppedHandlerAsync();
+                     return;
+                 }
+
+                 _start.AcceptEula();
+                 await _start.StartServerAsync();
+             });
         }
 
 
@@ -290,6 +312,7 @@ namespace ServerManagerInterface.Controllers
                 button: MessageBoxButton.OK,
                 icon: MessageBoxImage.Error
                 );
+
             //await SwitchStateAsync(State.Idle);
             ServerStoppedHandlerAsync();
         }

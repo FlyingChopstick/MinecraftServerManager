@@ -9,15 +9,15 @@ namespace ServerManager
     {
         public delegate void ServerStatusHandler();
         public delegate void ServerCrashHandler(Exception ex);
+        public delegate void EulaNotAcceptedHandler();
         public event ServerStatusHandler Stopped;
         public event ServerCrashHandler Crashed;
+        public event EulaNotAcceptedHandler OnEulaCrash;
 
-        //private Process _server;
-        //private Server server;
-
-        public Start()
+        public void AcceptEula()
         {
-            Server.Exited += Server_Exited;
+            var marker = Marker.ForDirectory(MarkerType.Server, Config.SelectedServerDir);
+            marker.IsEulaAccepted = true;
         }
 
         public Task StartServerAsync()
@@ -35,24 +35,32 @@ namespace ServerManager
                 Directory.SetCurrentDirectory(Config.SelectedServerDir);
 
                 var marker = Marker.ForDirectory(MarkerType.Server, Config.SelectedServerDir);
+                var server = new Server(marker)
+                {
+                    //server.Directory = marker.ServerDir;
+                    Arguments = "/C " +
+                        marker.JavaPath +
+                        " " +
+                        marker.LaunchArgs +
+                        $" -jar " +
+                        marker.ServerJar +
+                        " " +
+                        marker.Gui
+                };
 
-                Server.Directory = marker.ServerDir;
-                Server.Arguments = "/C " +
-                marker.JavaPath +
-                " " +
-                marker.LaunchArgs +
-                $" -jar " +
-                marker.ServerJar +
-                " " +
-                marker.Gui;
-
-                Server.Exited += Server_Exited;
-                Server.Start();
+                server.OnServerExited += Server_OnServerExited;
+                server.Start();
             });
         }
 
-        private void Server_Exited(object sender, EventArgs e)
+        private void Server_OnServerExited(bool isEulaAccepted = true)
         {
+            if (!isEulaAccepted)
+            {
+                OnEulaCrash?.Invoke();
+                return;
+            }
+
             Stopped?.Invoke();
         }
     }

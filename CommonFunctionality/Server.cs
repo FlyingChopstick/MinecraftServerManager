@@ -3,24 +3,68 @@ using System.Diagnostics;
 
 namespace CommonFunctionality
 {
-    public static class Server
+    public class Server : IDisposable
     {
-        public static void Start(bool enableRaisingEvents = true)
+
+        public delegate void ServerExitedHandler(bool isEulaAccepted = true);
+        public event ServerExitedHandler OnServerExited;
+
+        public Server(Marker serverMarker)
+        {
+            Directory = serverMarker.ServerDir;
+            IsEulaAccepted = serverMarker.IsEulaAccepted;
+        }
+
+        public void Start(bool enableRaisingEvents = true)
         {
             _server = new();
+
             _server.EnableRaisingEvents = enableRaisingEvents;
+
             _server.StartInfo.FileName = "cmd";
             _server.StartInfo.WorkingDirectory = Directory;
             _server.StartInfo.Arguments = Arguments;
 
             _server.Start();
-            _server.Exited += Exited;
+            _server.Exited += ServerExited; ;
+        }
+        public void Shutdown()
+        {
+            _server.Kill();
         }
 
-        public static string Arguments { get; set; } = string.Empty;
-        public static string Directory { get; set; } = string.Empty;
+        private void ServerExited(object sender, EventArgs e)
+        {
+            OnServerExited?.Invoke(IsEulaAccepted);
+        }
 
-        public static event EventHandler Exited;
-        private static Process _server;
+        public string Arguments { get; set; } = string.Empty;
+        public string Directory { get; init; } = string.Empty;
+        public bool IsEulaAccepted { get; }
+
+        //public event EventHandler Exited;
+        private Process _server;
+        private bool _disposedValue;
+
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposedValue)
+            {
+                if (disposing)
+                {
+                    _server.Kill();
+                }
+
+                _disposedValue = true;
+            }
+        }
+
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
     }
 }

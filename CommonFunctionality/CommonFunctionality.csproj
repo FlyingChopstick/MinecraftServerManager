@@ -4,6 +4,7 @@
     <TargetFramework>net5.0</TargetFramework>
   </PropertyGroup>
 
+
   <ItemGroup>
     <None Include="..\ServerManagerInterface\App.config" Link="App.config" />
   </ItemGroup>

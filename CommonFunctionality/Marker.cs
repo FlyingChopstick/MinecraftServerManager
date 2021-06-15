@@ -29,14 +29,20 @@ namespace CommonFunctionality
         public static readonly Dictionary<string, string> Requirements = new()
         {
             { JavaPath, EmptyValue },
-            { ShowGui, "false" },
+            { ShowGui, BoolFalse },
+            { IsEulaAccepted, BoolFalse },
             { LaunchArgs, "-Xms4G -Xmx2G" },
         };
 
         public const string EmptyValue = "none";
+        public const string BoolTrue = "true";
+        public const string BoolFalse = "false";
+
+
         public const string JavaPath = "Custom JRE";
-        public const string LaunchArgs = "Launch arguments";
         public const string ShowGui = "Show GUI";
+        public const string IsEulaAccepted = "User accepted EULA";
+        public const string LaunchArgs = "Launch arguments";
     }
 
     public class Marker
@@ -75,6 +81,7 @@ namespace CommonFunctionality
         }
 
 
+
         public string MarkerPath => FileContract.FilePath;
         public string MarkerName => FileContract.FileName;
         public string ServerDir => FileContract.Directory;
@@ -84,7 +91,20 @@ namespace CommonFunctionality
             .FirstOrDefault());
         public string JavaPath => ParseConfig(MarkerConf.JavaPath, "java");
         public string LaunchArgs => ParseConfig(MarkerConf.LaunchArgs);
-        public string Gui => ParseConfig(MarkerConf.ShowGui) == "true" ? "" : "nogui";
+        public string Gui => ParseConfig(MarkerConf.ShowGui) == MarkerConf.BoolTrue ? "" : "nogui";
+        public bool IsEulaAccepted
+        {
+            get
+            {
+                return ParseConfig(MarkerConf.IsEulaAccepted) == MarkerConf.BoolTrue;
+            }
+            set
+            {
+                FileContract.UpdateLine(MarkerConf.IsEulaAccepted, value ?
+                    $"{MarkerConf.IsEulaAccepted} = {MarkerConf.BoolTrue}"
+                    : $"{MarkerConf.IsEulaAccepted} = {MarkerConf.BoolFalse}");
+            }
+        }
 
 
         public FileContract FileContract { get; }
@@ -121,6 +141,7 @@ namespace CommonFunctionality
 
             return fallback;
         }
+
         private static bool IsModified(string line, string configName)
         {
             return line != default
