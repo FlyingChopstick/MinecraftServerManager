@@ -85,7 +85,7 @@ namespace ServerManagerInterface.Controllers
                      return;
                  }
 
-                 _start.AcceptEula();
+                 //_start.AcceptEula();
                  await _start.StartServerAsync();
              });
         }

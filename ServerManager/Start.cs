@@ -17,7 +17,7 @@ namespace ServerManager
         public void AcceptEula()
         {
             var marker = Marker.ForDirectory(MarkerType.Server, Config.SelectedServerDir);
-            marker.IsEulaAccepted = true;
+            //marker.IsEulaAccepted = true;
         }
 
         public Task StartServerAsync()

@@ -30,8 +30,8 @@ namespace CommonFunctionality
         {
             { JavaPath, EmptyValue },
             { ShowGui, BoolFalse },
-            { IsEulaAccepted, BoolFalse },
-            { LaunchArgs, "-Xms4G -Xmx2G" },
+            //{ IsEulaAccepted, BoolFalse },
+            { LaunchArgs, "-Xms2G -Xmx4G" },
         };
 
         public const string EmptyValue = "none";
@@ -41,7 +41,7 @@ namespace CommonFunctionality
 
         public const string JavaPath = "Custom JRE";
         public const string ShowGui = "Show GUI";
-        public const string IsEulaAccepted = "User accepted EULA";
+        //public const string IsEulaAccepted = "User accepted EULA";
         public const string LaunchArgs = "Launch arguments";
     }
 
@@ -68,6 +68,12 @@ namespace CommonFunctionality
                     break;
             }
             Type = type;
+
+
+
+            string eulaFile = $"{ServerDir}\\eula.txt";
+            IsEulaAccepted = File.Exists(eulaFile)
+                && File.ReadAllText(eulaFile).Contains("eula=true");
         }
         public static Marker ForDirectory(MarkerType type, string directory)
         {
@@ -92,18 +98,19 @@ namespace CommonFunctionality
         public string JavaPath => ParseConfig(MarkerConf.JavaPath, "java");
         public string LaunchArgs => ParseConfig(MarkerConf.LaunchArgs);
         public string Gui => ParseConfig(MarkerConf.ShowGui) == MarkerConf.BoolTrue ? "" : "nogui";
+
         public bool IsEulaAccepted
         {
-            get
-            {
-                return ParseConfig(MarkerConf.IsEulaAccepted) == MarkerConf.BoolTrue;
-            }
-            set
-            {
-                FileContract.UpdateLine(MarkerConf.IsEulaAccepted, value ?
-                    $"{MarkerConf.IsEulaAccepted} = {MarkerConf.BoolTrue}"
-                    : $"{MarkerConf.IsEulaAccepted} = {MarkerConf.BoolFalse}");
-            }
+            get;
+            //{
+            //    return ParseConfig(MarkerConf.IsEulaAccepted) == MarkerConf.BoolTrue;
+            //}
+            //set
+            //{
+            //    FileContract.UpdateLine(MarkerConf.IsEulaAccepted, value ?
+            //        $"{MarkerConf.IsEulaAccepted} = {MarkerConf.BoolTrue}"
+            //        : $"{MarkerConf.IsEulaAccepted} = {MarkerConf.BoolFalse}");
+            //}
         }
 
 
