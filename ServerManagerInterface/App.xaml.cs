@@ -1,6 +1,5 @@
-﻿using System;
+﻿using System.Linq;
 using System.Windows;
-using CommonFunctionality;
 using ServerManager;
 
 namespace ServerManagerInterface
@@ -10,9 +9,15 @@ namespace ServerManagerInterface
     /// </summary>
     public partial class App : Application
     {
-        private void StartupAsync(object sender, StartupEventArgs e)
+        private async void StartupAsync(object sender, StartupEventArgs e)
         {
+            if (e.Args.ToList().Contains("-s"))
+            {
+                Start start = new();
+                start.Stopped += ServerStoppedHandler;
+                await start.StartServerAsync();
 
+            }
 
             //Backup backup = new();
             //backup.Failed += Backup_Failed;
@@ -20,17 +25,16 @@ namespace ServerManagerInterface
             //await backup.BackupServerAsync();
         }
 
-        private void Backup_Complete(string path)
+        private async void ServerStoppedHandler()
         {
-            //Start start = new();
-            //await start.StartServerAsync();
+            Backup backup = new();
+            backup.Complete += BackupCompleteHandler;
+            await backup.BackupServerAsync();
         }
 
-        private void Backup_Failed(Exception ex)
+        private void BackupCompleteHandler(string path)
         {
-            MessageBox.Show(messageBoxText: "Could not backup the server",
-                caption: "Backup failed",
-                MessageBoxButton.OK, MessageBoxImage.Error);
+            this.MainWindow.Close();
         }
     }
 }
